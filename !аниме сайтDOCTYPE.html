@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiboAnime | Force Mode</title>
+    <meta name="referrer" content="no-referrer">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #050505; color: white; font-family: sans-serif; }
+        .video-box { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 15px; overflow: hidden; background: #111; border: 1px solid #333; }
+        .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="p-4">
+
+    <h1 class="text-[#ff8a00] font-black italic text-2xl mb-6">BIBOANIME <span class="text-white text-xs block opacity-50 font-normal">KZ FORCE MODE</span></h1>
+
+    <div id="grid" class="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <p class="col-span-full text-center py-10 opacity-50">Загрузка базы...</p>
+    </div>
+
+    <div id="player" class="fixed inset-0 z-[100] hidden bg-black flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl">
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="pTitle" class="font-bold truncate text-sm"></h2>
+                <button onclick="closeP()" class="text-xl">✕</button>
+            </div>
+            
+            <div class="video-box">
+                <iframe id="kFrame" src="" allowfullscreen></iframe>
+            </div>
+
+            <div class="mt-6 flex flex-col gap-4 items-center">
+                <div class="flex gap-2">
+                    <button onclick="trySrv(1)" class="bg-blue-600 px-4 py-2 rounded font-bold text-xs uppercase">Сервер 1 (Alloha)</button>
+                    <button onclick="trySrv(2)" class="bg-green-600 px-4 py-2 rounded font-bold text-xs uppercase">Сервер 2 (Ashdi)</button>
+                </div>
+                
+                <button onclick="forceOpen()" class="w-full bg-[#ff8a00] text-black py-4 rounded-xl font-black uppercase text-xs shadow-lg shadow-orange-500/20">
+                    🚀 Не грузит? Открыть через прокси-ссылку
+                </button>
+                
+                <p class="text-[10px] text-gray-500 text-center">Если "IP не найден" на всех серверах — значит провайдер блокирует DNS. Поможет только смена DNS в настройках Windows на 8.8.8.8</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let curId = null;
+
+        async function load() {
+            try {
+                const r = await fetch('https://shikimori.one/api/animes?limit=12&order=popularity&status=ongoing');
+                const data = await r.json();
+                document.getElementById('grid').innerHTML = data.map(a => `
+                    <div onclick="openP(${a.id}, '${a.russian || a.name}')" class="cursor-pointer group">
+                        <img src="https://shikimori.one${a.image.original}" class="rounded-lg group-hover:border-[#ff8a00] border border-transparent transition">
+                        <p class="text-[10px] mt-2 font-bold uppercase truncate">${a.russian || a.name}</p>
+                    </div>
+                `).join('');
+            } catch(e) { alert("Ошибка сети. Проверь интернет!"); }
+        }
+
+        function openP(id, title) {
+            curId = id;
+            document.getElementById('pTitle').innerText = title;
+            document.getElementById('player').classList.remove('hidden');
+            trySrv(1); // Начинаем с самого стабильного для КЗ
+        }
+
+        function trySrv(n) {
+            const f = document.getElementById('kFrame');
+            if(n === 1) f.src = `https://api.alloha.tv/player?shikimori=${curId}`;
+            if(n === 2) f.src = `https://ashdi.vip/vod/${curId}`;
+        }
+
+        // ОТКРЫТИЕ ЧЕРЕЗ СТОРОННИЙ СЕРВИС (План "Ультра")
+        function forceOpen() {
+            // Открываем через агрегатор, который провайдерам сложнее отследить
+            window.open(`https://www.kinosky.top/find?shikimoriID=${curId}`, '_blank');
+        }
+
+        function closeP() {
+            document.getElementById('player').classList.add('hidden');
+            document.getElementById('kFrame').src = '';
+        }
+
+        load();
+    </script>
+</body>
+</html>
