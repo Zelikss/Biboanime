@@ -12,75 +12,94 @@
         .video-box { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 15px; overflow: hidden; background: #111; border: 1px solid #333; }
         .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         .hidden { display: none !important; }
+        .srv-btn { transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        .srv-btn:hover { border-color: #ff8a00; background: rgba(255,138,0,0.1); }
     </style>
 </head>
 <body class="p-4">
 
-    <h1 class="text-[#ff8a00] font-black italic text-2xl mb-6">BIBOANIME <span class="text-white text-xs block opacity-50 font-normal">KZ FORCE MODE</span></h1>
+    <h1 class="text-[#ff8a00] font-black italic text-2xl mb-6 cursor-pointer" onclick="location.reload()">BIBO<span class="text-white">ANIME</span> <span class="text-white text-xs block opacity-50 font-normal italic">KZ FORCE MODE 2.0</span></h1>
 
     <div id="grid" class="grid grid-cols-2 md:grid-cols-6 gap-4">
-        <p class="col-span-full text-center py-10 opacity-50">Загрузка базы...</p>
+        <p class="col-span-full text-center py-10 opacity-50 uppercase tracking-widest text-xs">Синхронизация с базой...</p>
     </div>
 
-    <div id="player" class="fixed inset-0 z-[100] hidden bg-black flex items-center justify-center p-4">
+    <div id="player" class="fixed inset-0 z-[100] hidden bg-black/fb flex items-center justify-center p-4 backdrop-blur-md" onclick="if(event.target.id === 'player') closeP()">
         <div class="w-full max-w-4xl">
             <div class="flex justify-between items-center mb-4">
-                <h2 id="pTitle" class="font-bold truncate text-sm"></h2>
-                <button onclick="closeP()" class="text-xl">✕</button>
+                <h2 id="pTitle" class="font-bold truncate text-sm text-[#ff8a00] uppercase italic"></h2>
+                <button onclick="closeP()" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-red-500 transition">✕</button>
             </div>
             
-            <div class="video-box">
-                <iframe id="kFrame" src="" allowfullscreen></iframe>
+            <div class="video-box shadow-2xl">
+                <iframe id="kFrame" src="" allowfullscreen referrerpolicy="no-referrer"></iframe>
             </div>
 
             <div class="mt-6 flex flex-col gap-4 items-center">
-                <div class="flex gap-2">
-                    <button onclick="trySrv(1)" class="bg-blue-600 px-4 py-2 rounded font-bold text-xs uppercase">Сервер 1 (Alloha)</button>
-                    <button onclick="trySrv(2)" class="bg-green-600 px-4 py-2 rounded font-bold text-xs uppercase">Сервер 2 (Ashdi)</button>
+                <div class="flex flex-wrap justify-center gap-2">
+                    <button onclick="trySrv(1)" class="srv-btn bg-white/5 px-4 py-3 rounded-xl font-bold text-[10px] uppercase">Сервер 1 (Alloha)</button>
+                    <button onclick="trySrv(2)" class="srv-btn bg-white/5 px-4 py-3 rounded-xl font-bold text-[10px] uppercase">Сервер 2 (Kodik)</button>
+                    <button onclick="trySrv(3)" class="srv-btn bg-white/5 px-4 py-3 rounded-xl font-bold text-[10px] uppercase">Сервер 3 (Vidsrc)</button>
+                    <button onclick="trySrv(4)" class="srv-btn bg-white/5 px-4 py-3 rounded-xl font-bold text-[10px] uppercase">Сервер 4 (Ashdi)</button>
                 </div>
                 
-                <button onclick="forceOpen()" class="w-full bg-[#ff8a00] text-black py-4 rounded-xl font-black uppercase text-xs shadow-lg shadow-orange-500/20">
-                    🚀 Не грузит? Открыть через прокси-ссылку
+                <button onclick="forceOpen()" class="w-full bg-[#ff8a00] text-black py-4 rounded-2xl font-black uppercase text-[11px] shadow-[0_0_20px_rgba(255,138,0,0.2)] hover:scale-[1.02] transition">
+                    🚀 Не грузит? Попробовать другое зеркало (План Б)
                 </button>
                 
-                <p class="text-[10px] text-gray-500 text-center">Если "IP не найден" на всех серверах — значит провайдер блокирует DNS. Поможет только смена DNS в настройках Windows на 8.8.8.8</p>
+                <p class="text-[9px] text-gray-600 text-center uppercase tracking-tighter">Если везде 404 — проверь DNS 8.8.8.8 или нажми План Б несколько раз</p>
             </div>
         </div>
     </div>
 
     <script>
         let curId = null;
+        // Список зеркал для ротации (Сервер 2)
+        const MIRRORS = ['https://kinosky.top', 'https://db.sklad-k.com', 'https://aniqit.com'];
+        let curMirrorIdx = 0;
 
         async function load() {
             try {
-                const r = await fetch('https://shikimori.one/api/animes?limit=12&order=popularity&status=ongoing');
+                const r = await fetch('https://shikimori.one/api/animes?limit=18&order=popularity&status=ongoing');
                 const data = await r.json();
                 document.getElementById('grid').innerHTML = data.map(a => `
-                    <div onclick="openP(${a.id}, '${a.russian || a.name}')" class="cursor-pointer group">
-                        <img src="https://shikimori.one${a.image.original}" class="rounded-lg group-hover:border-[#ff8a00] border border-transparent transition">
-                        <p class="text-[10px] mt-2 font-bold uppercase truncate">${a.russian || a.name}</p>
+                    <div onclick="openP(${a.id}, '${(a.russian || a.name).replace(/'/g, "")}')" class="cursor-pointer group">
+                        <div class="relative overflow-hidden rounded-xl border border-white/5">
+                            <img src="https://shikimori.one${a.image.original}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                <i class="fa fa-play text-[#ff8a00] text-2xl"></i>
+                            </div>
+                        </div>
+                        <p class="text-[10px] mt-2 font-bold uppercase truncate italic opacity-70 group-hover:opacity-100 group-hover:text-[#ff8a00] transition">${a.russian || a.name}</p>
                     </div>
                 `).join('');
-            } catch(e) { alert("Ошибка сети. Проверь интернет!"); }
+            } catch(e) { console.error("Ошибка загрузки"); }
         }
 
         function openP(id, title) {
             curId = id;
             document.getElementById('pTitle').innerText = title;
             document.getElementById('player').classList.remove('hidden');
-            trySrv(1); // Начинаем с самого стабильного для КЗ
+            trySrv(1); 
         }
 
         function trySrv(n) {
             const f = document.getElementById('kFrame');
-            if(n === 1) f.src = `https://api.alloha.tv/player?shikimori=${curId}`;
-            if(n === 2) f.src = `https://ashdi.vip/vod/${curId}`;
+            f.src = 'about:blank'; // Сброс перед загрузкой
+            
+            setTimeout(() => {
+                if(n === 1) f.src = `https://api.alloha.tv/player?shikimori=${curId}`;
+                if(n === 2) f.src = `${MIRRORS[curMirrorIdx]}/find?shikimoriID=${curId}`;
+                if(n === 3) f.src = `https://vidsrc.me/embed/anime?shikimori=${curId}`;
+                if(n === 4) f.src = `https://ashdi.vip/vod/${curId}`;
+            }, 100);
         }
 
-        // ОТКРЫТИЕ ЧЕРЕЗ СТОРОННИЙ СЕРВИС (План "Ультра")
         function forceOpen() {
-            // Открываем через агрегатор, который провайдерам сложнее отследить
-            window.open(`https://www.kinosky.top/find?shikimoriID=${curId}`, '_blank');
+            // При каждом нажатии меняем зеркало Kodik
+            curMirrorIdx = (curMirrorIdx + 1) % MIRRORS.length;
+            const url = `${MIRRORS[curMirrorIdx]}/find?shikimoriID=${curId}`;
+            window.open(url, '_blank');
         }
 
         function closeP() {
