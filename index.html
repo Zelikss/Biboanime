@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #050505; color: white; font-family: sans-serif; }
-        .anime-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { background: #050505; color: white; font-family: sans-serif; overflow-x: hidden; }
+        .anime-card { transition: all 0.3s ease; }
         .anime-card:hover { transform: translateY(-8px); }
         .video-box { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 20px; overflow: hidden; background: #000; border: 2px solid #ff8a00; }
         .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
@@ -22,7 +22,7 @@
 </head>
 <body class="pt-24">
 
-    <header class="fixed top-0 w-full z-[100] bg-black/90 border-b border-white/5 py-4 backdrop-blur-md">
+    <header class="fixed top-0 w-full z-[100] bg-black/95 border-b border-white/5 py-4 backdrop-blur-md">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <h1 class="text-[#ff8a00] font-black italic text-2xl tracking-tighter cursor-pointer" onclick="location.reload()">
                 BIBO<span class="text-white text-sm ml-1 opacity-80 uppercase">Anime</span>
@@ -37,7 +37,7 @@
         
         <section class="mb-10">
             <h2 class="text-[#ff8a00] font-black uppercase italic mb-4 flex items-center gap-2 text-sm">
-                <span class="bg-[#ff8a00] text-black px-2 py-0.5 rounded italic">TOP 10</span> Лучшее сейчас
+                <span class="bg-[#ff8a00] text-black px-2 py-0.5 rounded italic">TOP 10</span> Популярное
             </h2>
             <div id="top10" class="flex gap-4 overflow-x-auto pb-4 custom-scroll"></div>
         </section>
@@ -45,15 +45,15 @@
         <section class="mb-8 overflow-hidden">
             <div class="flex gap-2 overflow-x-auto pb-2 custom-scroll" id="genreList">
                 <button class="genre-btn active px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes('all', this)">Все</button>
-                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes('shounen', this)">Сёнен</button>
-                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes('fantasy', this)">Фэнтези</button>
-                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes('comedy', this)">Комедия</button>
-                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes('action', this)">Экшен</button>
+                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes(27, this)">Сёнен</button>
+                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes(10, this)">Фэнтези</button>
+                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes(4, this)">Комедия</button>
+                <button class="genre-btn px-5 py-2 rounded-xl text-[10px] font-bold uppercase" onclick="loadAnimes(1, this)">Экшен</button>
             </div>
         </section>
 
         <div id="mainGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            <div class="col-span-full text-center py-20 opacity-30 uppercase text-[10px] tracking-widest">Загрузка...</div>
+            <div class="col-span-full text-center py-20 opacity-30 uppercase text-[10px] tracking-widest">Загрузка данных...</div>
         </div>
 
     </main>
@@ -64,30 +64,30 @@
             <div class="flex justify-center gap-6 text-[10px] uppercase font-bold opacity-50 mb-8 tracking-widest">
                 <a href="#" class="hover:text-[#ff8a00]">Telegram</a>
                 <a href="#" class="hover:text-[#ff8a00]">Discord</a>
-                <a href="#" class="hover:text-[#ff8a00]">DMCA</a>
+                <a href="#" class="hover:text-[#ff8a00]">DMCA / Помощь</a>
             </div>
-            <p class="text-[9px] text-red-500 uppercase font-bold max-w-xl mx-auto opacity-40 leading-relaxed">
-                Если плеер не находит IP-адрес — смените DNS на 8.8.8.8 в настройках ПК.
+            <p class="text-[9px] text-red-500 uppercase font-bold max-w-xl mx-auto opacity-60 leading-relaxed">
+                Если плееры выдают 404 или ошибку IP — смените DNS на 8.8.8.8 в настройках вашего устройства.
             </p>
         </div>
     </footer>
 
-    <div id="playerOverlay" class="fixed inset-0 z-[200] hidden bg-black/fb flex items-center justify-center p-4 backdrop-blur-2xl" onclick="if(event.target.id === 'playerOverlay') closePlayer()">
+    <div id="playerOverlay" class="fixed inset-0 z-[200] hidden bg-black/95 flex items-center justify-center p-4 backdrop-blur-xl" onclick="if(event.target.id === 'playerOverlay') closePlayer()">
         <div class="w-full max-w-5xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="pTitle" class="text-xs md:text-lg font-black uppercase text-[#ff8a00] italic truncate mr-4"></h3>
                 <div class="flex gap-4 items-center">
                     <button id="favBtn" onclick="toggleFav()" class="text-xl hover:scale-110 transition"><i class="fa-regular fa-heart"></i></button>
-                    <button onclick="closePlayer()" class="text-2xl transition px-2">✕</button>
+                    <button onclick="closePlayer()" class="text-2xl hover:text-red-500 transition px-2">✕</button>
                 </div>
             </div>
-            <div class="video-box shadow-2xl">
+            <div class="video-box shadow-2xl shadow-orange-500/10">
                 <iframe id="kFrame" src="" allowfullscreen></iframe>
             </div>
             <div class="mt-6 flex flex-wrap justify-center gap-2">
-                <button onclick="trySrv(1)" class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-[10px] font-bold uppercase">Сервер 1</button>
-                <button onclick="trySrv(2)" class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-[10px] font-bold uppercase">Сервер 2 (Kodik)</button>
-                <button onclick="trySrv(3)" class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-[10px] font-bold uppercase">Сервер 3 (Зарубежный)</button>
+                <button onclick="trySrv(1)" class="bg-white/5 border border-white/10 px-4 py-3 rounded-xl text-[10px] font-bold uppercase hover:bg-white/10 transition">Сервер 1 (Alloha)</button>
+                <button onclick="trySrv(2)" class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-[10px] font-bold uppercase hover:bg-white/10 transition">Сервер 2 (Kodik)</button>
+                <button onclick="trySrv(3)" class="bg-white/5 border border-white/10 px-4 py-2 rounded-lg text-[10px] font-bold uppercase hover:bg-white/10 transition">Сервер 3 (Зарубежный)</button>
                 <button onclick="forceOpen()" class="bg-[#ff8a00] text-black px-4 py-2 rounded-lg text-[10px] font-black uppercase shadow-lg">Сменить зеркало</button>
             </div>
         </div>
@@ -99,20 +99,23 @@
         const KODIK_MIRRORS = ['https://kinosky.top', 'https://db.sklad-k.com', 'https://aniqit.com'];
         let mirrorIdx = 0;
 
-        async function loadAnimes(genre = 'all', btn = null) {
+        async function loadAnimes(genreId = 'all', btn = null) {
             if(btn) {
                 document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
             }
             const grid = document.getElementById('mainGrid');
             grid.innerHTML = '<div class="col-span-full text-center py-20 opacity-30 text-[10px] uppercase tracking-widest">Загрузка...</div>';
+            
             try {
                 let url = 'https://shikimori.one/api/animes?limit=24&order=popularity&kind=tv&status=ongoing';
-                if(genre !== 'all') url += `&genre=${genre}`;
+                if(genreId !== 'all') url += `&genre=${genreId}`;
+                
                 const r = await fetch(url);
                 const data = await r.json();
                 grid.innerHTML = data.map(a => renderCard(a)).join('');
-                if(genre === 'all') {
+                
+                if(genreId === 'all') {
                     document.getElementById('top10').innerHTML = data.slice(0, 10).map((a, i) => `
                         <div onclick="openPlayer(${a.id}, '${(a.russian || a.name).replace(/'/g, "")}')" class="flex-shrink-0 w-36 cursor-pointer group">
                             <div class="relative rounded-2xl overflow-hidden h-48 border-2 border-white/5 group-hover:border-[#ff8a00] transition-all">
@@ -122,7 +125,7 @@
                         </div>
                     `).join('');
                 }
-            } catch(e) { grid.innerHTML = 'Ошибка сети.'; }
+            } catch(e) { grid.innerHTML = 'Ошибка загрузки аниме.'; }
         }
 
         function renderCard(a) {
@@ -134,7 +137,7 @@
                             <i class="fa fa-play text-[#ff8a00] text-3xl"></i>
                         </div>
                     </div>
-                    <p class="text-[10px] mt-3 font-bold uppercase truncate opacity-70 group-hover:text-[#ff8a00]">${a.russian || a.name}</p>
+                    <p class="text-[10px] mt-3 font-bold uppercase truncate opacity-70 group-hover:text-[#ff8a00] tracking-tighter">${a.russian || a.name}</p>
                 </div>
             `;
         }
@@ -143,6 +146,7 @@
             curAnime = { id, title };
             document.getElementById('pTitle').innerText = title;
             document.getElementById('playerOverlay').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
             updateFavIcon();
             trySrv(1);
         }
@@ -177,7 +181,7 @@
 
         async function showFavs() {
             const grid = document.getElementById('mainGrid');
-            if(favorites.length === 0) { alert("В избранном пусто!"); return; }
+            if(favorites.length === 0) { alert("Список избранного пуст!"); return; }
             grid.innerHTML = '<h2 class="col-span-full text-[#ff8a00] font-black uppercase italic text-xl mb-4">Ваша коллекция</h2>';
             for(let fav of favorites) {
                 try {
@@ -191,6 +195,7 @@
         function closePlayer() {
             document.getElementById('playerOverlay').classList.add('hidden');
             document.getElementById('kFrame').src = '';
+            document.body.style.overflow = 'auto';
         }
 
         loadAnimes();
